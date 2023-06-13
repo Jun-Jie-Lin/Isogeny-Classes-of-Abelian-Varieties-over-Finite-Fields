@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[203]:
+# In[48]:
 
 
 #Variables
@@ -13,8 +13,17 @@ q = p^n
 dim = 4
 deg = 2 * dim
 
-#Acquired data from the LMFDB
-#Chnage p,n in variables and below in the loads to your new value of q = p^n, up to q = 5
+#Change p,n in variables and below in the loads to your new value of q = p^n, up to q = 4 if you want the whole file to be able to run
+#can use any q if you want to run everything except the last parts after def CharpolysofsimpleAVofdim4frombounds(l,p,n):
+
+#change 2 in the load the below to match the new value of q, so that it is load("q-weil_polynomials_dim4.sage")
+
+load("2-weil_polynomials_dim4.sage")
+
+#the file that has been loaded contains the characteristic polynomials of all simple abelian varieties over F_q of dimension 4
+#this data has been downloaded from the LMFDB and the polynomials have been separated based on p-rank
+#The LMFDB-data uses L-polynomials (which are Weil polynomials, but with the coefficients reversed)
+#Hence we convert each element in the lists to Weil polynomials
 
 def ConvertLtoWeil(LMFDBlist):
     Weilpolys = []
@@ -26,243 +35,254 @@ def ConvertLtoWeil(LMFDBlist):
         Weilpolys.append(R(newpolycoeffs))
     return Weilpolys
 
-#change 2 in the load the below to the new value of q, so that it is load("q-weil_polynomials_dim4.sage")
-
-load("2-weil_polynomials_dim4.sage")
-
-charpolydim4 = ConvertLtoWeil(data_dim4)
 charpolydim4prank4 = ConvertLtoWeil(data_dim4_prank4)
 charpolydim4prank3 = ConvertLtoWeil(data_dim4_prank3)
 charpolydim4prank2 = ConvertLtoWeil(data_dim4_prank2)
 charpolydim4prank1 = ConvertLtoWeil(data_dim4_prank1)
 charpolydim4prank0 = ConvertLtoWeil(data_dim4_prank0)
+charpolydim4 = charpolydim4prank4 + charpolydim4prank3 + charpolydim4prank2 + charpolydim4prank1 + charpolydim4prank0
+
+#data_dim_4_prankm is the list of data of simple abelian varieties of dimension 4 over F_q with p-rank m
 
 
-# In[175]:
+# In[39]:
 
 
-#Build-in function in Sage to generate all q-Weil polynomials of degree deg
+#Built-in function in Sage to generate all q-Weil polynomials of degree deg
 L = R.weil_polynomials(deg, q)
-print("number of Weil polynomials according to function:", len(L))
 
 
-# In[176]:
+# In[40]:
 
 
 #Generate list of all possible coefficients as in Theorem 10.2.3
 
-l = []
+def Weilpolysofdeg8frombounds(q):
+    l = []
 
-bounda1lower = math.floor(- 8 * sqrt(q)) + 1
-bounda1higher = math.ceil(8 * sqrt(q))
+    bounda1lower = math.floor(- 8 * sqrt(q)) + 1
+    bounda1higher = math.ceil(8 * sqrt(q))
 
-for a1 in range(bounda1lower, bounda1higher):
-    u2part1 = 3/8 * a1^2 + 4 * q
+    for a1 in range(bounda1lower, bounda1higher):
+        u2part1 = 3/8 * a1^2 + 4 * q
     
-    bounda2lower = math.floor(6 * sqrt(q) * abs(a1) - 20 * q) + 1
-    bounda2higher = math.floor(u2part1) + 1
+        bounda2lower = math.floor(6 * sqrt(q) * abs(a1) - 20 * q) + 1
+        bounda2higher = math.floor(u2part1) + 1
     
-    for a2 in range(bounda2lower, bounda2higher):
-        u2 = (-u2part1 + a2)/2
+        for a2 in range(bounda2lower, bounda2higher):
+            u2 = (-u2part1 + a2)/2
         
-        u3part1 = a1 * a2 / 2 - a1^3 / 8 + a1 * q
-        bounda3firstvar = (-4/3 * u2)^(3/2)
+            u3part1 = a1 * a2 / 2 - a1^3 / 8 + a1 * q
+            bounda3firstvar = (-4/3 * u2)^(3/2)
         
-        bounda3lower1 = math.ceil(u3part1 - bounda3firstvar)
-        bounda3higher1 = math.floor(u3part1 + bounda3firstvar) + 1
+            bounda3lower1 = math.ceil(u3part1 - bounda3firstvar)
+            bounda3higher1 = math.floor(u3part1 + bounda3firstvar) + 1
         
-        bounda3secondabs = 4 * sqrt(q) * a2 + 16 * q * sqrt(q)
-        bounda3secondvar = - 9 * q * a1
+            bounda3secondabs = 4 * sqrt(q) * a2 + 16 * q * sqrt(q)
+            bounda3secondvar = - 9 * q * a1
         
-        bounda3lower2 = math.floor(- bounda3secondabs + bounda3secondvar) + 1
-        bounda3higher2 = math.ceil(bounda3secondabs + bounda3secondvar)
+            bounda3lower2 = math.floor(- bounda3secondabs + bounda3secondvar) + 1
+            bounda3higher2 = math.ceil(bounda3secondabs + bounda3secondvar)
         
-        bounda3lower = max(bounda3lower1, bounda3lower2)
-        bounda3higher = min(bounda3higher1, bounda3higher2)
+            bounda3lower = max(bounda3lower1, bounda3lower2)
+            bounda3higher = min(bounda3higher1, bounda3higher2)
         
-        for a3 in range(bounda3lower, bounda3higher):
-            u3 = (u3part1 - a3) / 4
+            for a3 in range(bounda3lower, bounda3higher):
+                u3 = (u3part1 - a3) / 4
             
-            bounda4abs = 3/256 * a1^4 - a1^2 * a2 / 16 - a1^2 * q / 2 + a1 * a3 / 4 + 2 * a2 * q - 2 * q^2 + 2/3 * u2^2
+                bounda4abs = 3/256 * a1^4 - a1^2 * a2 / 16 - a1^2 * q / 2 + a1 * a3 / 4 + 2 * a2 * q - 2 * q^2 + 2/3 * u2^2
             
-            etareal = - u2^6 / 27 - 5 * u2^3 * u3^2 + 27/2 * u3^4
-            etaimaginary = 27/2 * u3 * (- u3^2 - 4/27 * u2^3)^(3/2)
+                etareal = - u2^6 / 27 - 5 * u2^3 * u3^2 + 27/2 * u3^4
+                etaimaginary = 27/2 * u3 * (- u3^2 - 4/27 * u2^3)^(3/2)
             
-            base = C(etareal, etaimaginary)
-            eta = base.nth_root(3)
-            eta2 = eta * E(3)
-            eta3 = eta * E(3)^2
+                base = C(etareal, etaimaginary)
+                eta = base.nth_root(3)
+                eta2 = eta * E(3)
+                eta3 = eta * E(3)^2
             
-            root1 = 2 * real_part(eta)
-            root2 = 2 * real_part(eta2)
-            root3 = 2 * real_part(eta3)
+                root1 = 2 * real_part(eta)
+                root2 = 2 * real_part(eta2)
+                root3 = 2 * real_part(eta3)
             
-            bounda4lower1 = math.ceil(bounda4abs + min([root1, root2, root3]))
-            bounda4higher = math.floor(bounda4abs + median([root1, root2, root3])) + 1
+                bounda4lower1 = math.ceil(bounda4abs + min([root1, root2, root3]))
+                bounda4higher = math.floor(bounda4abs + median([root1, root2, root3])) + 1
             
-            bounda4lower2 = math.floor(2 * sqrt(q) * abs(a1 * q + a3) - 2 * q * a2 - 2 * q^2) + 1
+                bounda4lower2 = math.floor(2 * sqrt(q) * abs(a1 * q + a3) - 2 * q * a2 - 2 * q^2) + 1
             
-            bounda4lower = max(bounda4lower1, bounda4lower2)
+                bounda4lower = max(bounda4lower1, bounda4lower2)
             
-            for a4 in range(bounda4lower, bounda4higher):
-                l.append(R([q^4, a1 * q^3, a2 * q^2, a3 * q, a4, a3, a2, a1, 1]))
+                for a4 in range(bounda4lower, bounda4higher):
+                    l.append(R([q^4, a1 * q^3, a2 * q^2, a3 * q, a4, a3, a2, a1, 1]))
                 
-print(len(l))
+    return(l)
+
+l = Weilpolysofdeg8frombounds(q)
 
 
-# In[177]:
+# In[41]:
 
 
-#Check for differences between lists generated by function and the one generated by bounds
-Missing = []
+#Check for differences between lists generated by the built-in function and the one generated by Theorem 10.2.3
+def comparisonlists(l,L):
+    Missing = []
 
-for e in L:
-    if e not in l:
-        Missing.append(e)
-        print(e.factor())
+    for e in L:
+        if e not in l:
+            Missing.append(e)
+            print(e.factor())
 
-print("number of polynomials missed by the bounds:", len(Missing))
+    print("number of polynomials missed by the bounds:", len(Missing))
 
-extra = []
-for f in l:
-    if f not in L:
-        extra.append(f)
-        print(f.factor())
+    extra = []
+    for f in l:
+        if f not in L:
+            extra.append(f)
+            print(f.factor())
 
-print("number of extra polynomials found by the bounds", len(extra))
+    print("number of extra polynomials found by the bounds", len(extra))
 
-Missingreals = []
+    Missingreals = []
 
-for pols in Missing:
-    if (pols(sqrt(q)) == 0) or (pols(- sqrt(q)) == 0):
-        Missingreals.append(pols)
+    for pols in Missing:
+        if (pols(sqrt(q)) == 0) or (pols(- sqrt(q)) == 0):
+            Missingreals.append(pols)
 
-print("number of the missing polynomials that have a real root:", len(Missingreals))
+    print("number of the missing polynomials that have a real root:", len(Missingreals))
 
-realsinresult = []
+    realsinresult = []
 
-for realtest in l:
-    if (realtest(sqrt(q)) == 0) or (realtest(- sqrt(q)) == 0):
-        realsinresult.append(realtest)
+    for realtest in l:
+        if (realtest(sqrt(q)) == 0) or (realtest(- sqrt(q)) == 0):
+            realsinresult.append(realtest)
 
-print("number of weil polynomials with real roots satisfying the bounds:", len(realsinresult))
+    print("number of weil polynomials with real roots satisfying the bounds:", len(realsinresult))
+
+comparisonlists(l,L)
 
 
 # In[10]:
 
 
-#The polynomials above are exactly the ones described in "the other case" in Haloui's theorem 1.1
+#The polynomials missing are exactly the ones with a real root, as described in Theorem 10.2.2 (and 10.2.1 if q is a square)
 
 
-# In[197]:
+# In[49]:
 
 
-#check which Weil polynomials are characteristic polynomials of simple abelian varieties over F_q
+#check which Weil polynomials are characteristic polynomials of simple abelian varieties over F_q, according to Theorem 10.4
 
-prank0 = []
-prank1 = []
-prank2 = []
-prank3 = []
-prank4 = []
+def CharpolysofsimpleAVofdim4frombounds(l,p,n):
 
-Rp = Zp(p)
-vp = Rp.valuation()
-S.<y> = Zp(p, prec = 10000, type = 'capped-rel', print_mode = 'series')[]
+    prank0 = []
+    prank1 = []
+    prank2 = []
+    prank3 = []
+    prank4 = []
 
-for polyns in l:
-    if polyns.is_irreducible():
-        d = polyns.degree()
-        vpa4 = vp(polyns[d - 4])
-        vpa3 = vp(polyns[d - 3])
-        vpa2 = vp(polyns[d - 2])
-        vpa1 = vp(polyns[d - 1])
+    Rp = Zp(p)
+    vp = Rp.valuation()
+    S.<y> = Zp(p, prec = 100, type = 'capped-rel', print_mode = 'series')[]
+
+    for polyns in l:
+        if polyns.is_irreducible():
+            d = polyns.degree()
+            vpa4 = vp(polyns[d - 4])
+            vpa3 = vp(polyns[d - 3])
+            vpa2 = vp(polyns[d - 2])
+            vpa1 = vp(polyns[d - 1])
         
-        if vpa4 == 0:
-            prank4.append(polyns)
-        else:
-            rootsof = polyns.roots(Rp)
-            rootvalus = []
-            if not len(rootsof) == 0:
-                for roots in rootsof:
-                    rootvalus.append(vp(roots[0]))
+            if vpa4 == 0:
+                prank4.append(polyns)
+            else:
+                rootsof = polyns.roots(Rp)
+                rv = []
+                if not len(rootsof) == 0:
+                    for roots in rootsof:
+                        rv.append(vp(roots[0]))
             
-            coeffsinZp = []
-            for co in range(polyns.degree() + 1):
-                coeffsinZp.append(polyns[co])
-                polynsinZp = S(coeffsinZp)
+                coeffsinZp = []
+                for co in range(polyns.degree() + 1):
+                    coeffsinZp.append(polyns[co])
+                    polynsinZp = S(coeffsinZp)
             
-            factorinZp = polynsinZp.factor()
-            factordegs = []
-            for fa in factorinZp:
-                factordegs.append(fa[0].degree())
+                factorinZp = polynsinZp.factor()
+                fd = []
+                for fa in factorinZp:
+                    fd.append(fa[0].degree())
             
-            if vpa4 >= n/2 and vpa3 == 0 and n/2 not in rootvalus:
-                prank3.append(polyns)
+                if vpa4 >= n/2 and vpa3 == 0 and n/2 not in rv:
+                    prank3.append(polyns)
             
-            elif vpa4 >= n and vpa3 >= n/2 and vpa2 == 0 and n/2 not in rootvalus:
-                prank2.append(polyns)
+                elif vpa4 >= n and vpa3 >= n/2 and vpa2 == 0 and n/2 not in rv:
+                    prank2.append(polyns)
             
-            elif vpa4 == n and vpa3 >= 2/3 * n and vpa2 >= n/3 and vpa1 == 0 and (2/3 * n not in rootvalus) and (n/3 not in rootvalus):
-                prank1.append(polyns)
+                elif vpa4 == n and vpa3 >= 2/3 * n and vpa2 >= n/3 and vpa1 == 0 and (2/3 * n not in rv) and (n/3 not in rv):
+                    prank1.append(polyns)
             
-            elif vpa4 >= 3/2 * n and vpa3 >= n and vpa2 >= n/2 and vpa1 == 0 and (n/2 not in rootvalus) and 3 not in factordegs:
-                prank1.append(polyns)            
+                elif vpa4 >= 3/2 * n and vpa3 >= n and vpa2 >= n/2 and vpa1 == 0 and (n/2 not in rv) and 3 not in fd:
+                    prank1.append(polyns)            
 
-            elif vpa4 == n and vpa3 >= 3/4 * n and vpa2 >= n/2 and vpa1 >= n/4 and len(rootvalus) == 0 and 2 not in factordegs:
-                prank0.append(polyns) 
+                elif vpa4 == n and vpa3 >= 3/4 * n and vpa2 >= n/2 and vpa1 >= n/4 and len(rv) == 0 and 2 not in fd:
+                    prank0.append(polyns) 
 
-            elif vpa4 >= 3/2 * n and vpa3 == n and vpa2 >= 2/3 *n and vpa1 >= n/3 and len(rootvalus) == 0:
-                prank0.append(polyns) 
+                elif vpa4 >= 3/2 * n and vpa3 == n and vpa2 >= 2/3 *n and vpa1 >= n/3 and len(rv) == 0:
+                    prank0.append(polyns) 
             
-            elif vpa4 >= 2 * n and vpa3 >= 3/2 * n and vpa2 >= n and vpa1 >= n/2 and len(rootvalus) == 0 and 3 not in factordegs:
-                prank0.append(polyns) 
+                elif vpa4 >= 2 * n and vpa3 >= 3/2 * n and vpa2 >= n and vpa1 >= n/2 and len(rv) == 0 and 3 not in fd:
+                    prank0.append(polyns) 
                 
 
-    elif len(polyns.factor()) == 1:
-        if n % 3 == 0 and polyns.factor()[0][1] == 3:
-            if abs(polyns.factor()[0][0][1]) < 2 * sqrt(q) and polyns.factor()[0][0][1] % q^(1/3) == 0 and not polyns.factor()[0][0][1] / q^(1/3) % p == 0:
-                prank0.append(polyns)
+        elif len(polyns.factor()) == 1:
+            if n % 4 == 0 and polyns.factor()[0][1] == 4:
+                omega = polyns.factor()[0][0][1]
+                if abs(omega) < 2 * sqrt(q) and omega % q^(1/4) == 0:
+                    if not omega / q^(1/4) % p == 0:
+                        prank0.append(polyns)
         
-        elif polyns.factor()[0][1] == 2:
-            m = polyns.factor()[0][0]
-            d = m.degree()
-            b2 = m[d - 2]
-            b1 = m[d - 1]
+            elif polyns.factor()[0][1] == 2:
+                m = polyns.factor()[0][0]
+                d = m.degree()
+                b2 = m[d - 2]
+                b1 = m[d - 1]
             
-            vpb2 = vp(b2)
-            vpb1 = vp(b1)
+                vpb2 = vp(b2)
+                vpb1 = vp(b1)
             
-            rootsof = m.roots(Rp)
-            rootvalus = []
-            if not len(rootsof) == 0:
-                for roots in rootsof:
-                    rootvalus.append(vp(roots[0]))
+                rootsof = m.roots(Rp)
+                rv = []
+                if not len(rootsof) == 0:
+                    for roots in rootsof:
+                        rv.append(vp(roots[0]))
             
-            coeffsinZp = []
-            for co in range(m.degree() + 1):
-                coeffsinZp.append(m[co])
-                polynsinZp = S(coeffsinZp)
+                coeffsinZp = []
+                for co in range(m.degree() + 1):
+                    coeffsinZp.append(m[co])
+                    polynsinZp = S(coeffsinZp)
             
-            factorinZp = polynsinZp.factor()
-            factordegs = []
-            for fa in factorinZp:
-                factordegs.append(fa[0].degree())
+                factorinZp = polynsinZp.factor()
+                fd = []
+                for fa in factorinZp:
+                    fd.append(fa[0].degree())
             
-            if vpb2 >= n/2 and vpb1 == 0 and Rp((b2 + 2 * q)^2 - 4 * q * b1).is_square():
-                prank2.append(polyns)
+                if vpb2 >= n/2 and vpb1 == 0 and Rp((b2 + 2 * q)^2 - 4 * q * b1).is_square():
+                    prank2.append(polyns)
             
-            elif vpb2 == n/2 and vpb1 >= n/4 and len(rootvalus) == 0:
-                prank0.append(polyns)
+                elif vpb2 == n/2 and vpb1 >= n/4 and len(rv) == 0:
+                    prank0.append(polyns)
                 
-            elif vpb2 >= n and vpb1 >= n/2 and not len(rootvalus) == 0:
-                prank0.append(polyns)
+                elif vpb2 >= n and vpb1 >= n/2 and not len(rv) == 0:
+                    prank0.append(polyns)
 
-total = prank0 + prank1 + prank2 + prank3 + prank4
+    total = prank0 + prank1 + prank2 + prank3 + prank4
+    
+    return prank4, prank3, prank2, prank1, prank0, total
 
-#beneath is the comparison with LMFDB
+prank4, prank3, prank2, prank1, prank0, total = CharpolysofsimpleAVofdim4frombounds(l,p,n)
+
+#beneath is the comparison of characteristic polynomials of simple abelian varieties of dimension 4 over F_q with data from LMFDB
 
 
-# In[204]:
+# In[50]:
 
 
 Missing4 = []
@@ -283,7 +303,7 @@ print("characteristic polynomials in LMFDB but not in code:", Missing4)
 print("characteristic polynomials in code, but not in LMFDB:", extra4)
 
 
-# In[205]:
+# In[51]:
 
 
 Missing3 = []
@@ -304,7 +324,7 @@ print("characteristic polynomials in LMFDB but not in code:", Missing3)
 print("characteristic polynomials in code, but not in LMFDB:", extra3)
 
 
-# In[206]:
+# In[52]:
 
 
 Missing2 = []
@@ -325,7 +345,7 @@ print("characteristic polynomials in LMFDB but not in code:", Missing2)
 print("characteristic polynomials in code, but not in LMFDB:", extra2)
 
 
-# In[207]:
+# In[53]:
 
 
 Missing1 = []
@@ -346,7 +366,7 @@ print("characteristic polynomials in LMFDB but not in code:", Missing1)
 print("characteristic polynomials in code, but not in LMFDB:", extra1)
 
 
-# In[208]:
+# In[54]:
 
 
 Missing0 = []
@@ -365,6 +385,18 @@ print("number of characteristic polynomials p-rank 3 in LMFDB:", len(data_dim4_p
 print("number of characteristic polynomials p-rank 3 according to code:", len(prank0))
 print("characteristic polynomials in LMFDB but not in code:", Missing0)
 print("characteristic polynomials in code, but not in LMFDB:", extra0)
+
+
+# In[55]:
+
+
+Missingtotal = Missing0 + Missing1 + Missing2 + Missing3 + Missing4
+extratotal = extra0 + extra1 + extra2 + extra3 + extra4
+
+print("total number of characteristic polynomials in LMFDB:", len(charpolydim4))
+print("total number of characteristic polynomial according to code:", len(total))
+print("characteristic polynomials in LMFDB but not in code:", Missingtotal)
+print("characteristic polynomials in code but not in LMFDB:", extratotal)
 
 
 # In[ ]:
